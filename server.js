@@ -28,13 +28,13 @@ app.post('/download', async (req, res) => {
 
     try {
         // 提取影片信息，包括標題
-        const videoInfo = await exec(url, {
-            dumpSingleJson: true,
-            noCheckCertificates: true,
-            noWarnings: true,
+        const { stdout: title } = await exec(url, {
+            getTitle: true,  // 獲取標題
         });
+        const videoId = url.split('v=')[1].split('&')[0];
+        const embedUrl = url;
 
-        const title = videoInfo.title;  // 獲取影片標題
+        console.log('Video Title:', title.trim()); // 確認標題是否正確提取
 
         // 下載音訊
         await exec(url, {
@@ -55,23 +55,35 @@ app.post('/download', async (req, res) => {
             },
         });
 
-        const transcription = response.data.text;
+        let transcription = response.data.text;
+        transcription = wrapText(transcription);  // 例如，每行最多40個字符
 
+        console.log(transcription);
+        
+        
         res.json({
-            title,  // 返回影片標題
+            title: title.trim(),  // 返回影片標題
             transcription,
-            audio: {
-                filename: path.basename(output),
-                url: `http://localhost:${PORT}/downloads/${path.basename(output)}`,
-            },
+            audioSrc: embedUrl
         });
 
-        fs.unlinkSync(output);
+        // fs.unlinkSync(output);
     } catch (error) {
         console.error('Error processing download:', error);
         res.status(500).json({ error: 'Failed to download and transcribe video' });
     }
 });
+
+function wrapText(text) {
+    // 根據全形或半形標點符號來分割文本
+    const sentences = text.split(/(?<=[。？?.!！])/);
+    
+    // 將分割後的句子以換行符號連接起來
+    return sentences.join('\n');
+}
+
+
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
