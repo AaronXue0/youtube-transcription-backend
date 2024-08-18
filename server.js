@@ -21,8 +21,9 @@ app.post('/download', async (req, res) => {
     if (!url) {
         return res.status(400).json({ error: 'No URL provided' });
     }
-
-    console.log(url);
+    
+    var datetime = new Date();
+    console.log(datetime + " converting "+ url);
 
     const output = path.resolve(__dirname, `downloads/${Date.now()}.mp3`);
 
