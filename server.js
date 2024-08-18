@@ -29,11 +29,13 @@ app.post('/download', async (req, res) => {
 
     try {
         // 提取影片信息，包括標題
-        const { stdout: title } = await exec(url, {
-            getTitle: true,  // 獲取標題
-        });
-        const videoId = url.split('v=')[1].split('&')[0];
+        // const { stdout: title } = await exec(url, {
+        //     getTitle: true,  // 獲取標題
+        // });
+        // const videoId = url.split('v=')[1].split('&')[0];
         const embedUrl = url;
+
+        title = "Result"
 
         console.log('Video Title:', title.trim()); // 確認標題是否正確提取
 
