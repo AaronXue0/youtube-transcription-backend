@@ -36,24 +36,29 @@ app.post('/download', async (req, res) => {
 
         console.log('Video Title:', title.trim()); // 確認標題是否正確提取
 
+        console.log('Starting download...');
         // 下載音訊
         await exec(url, {
             extractAudio: true,
             audioFormat: 'mp3',
             output: output,
         });
+        console.log('Download completed.');
 
+        
         // 將下載的音訊檔案發送到OpenAI進行轉錄
         const formData = new FormData();
         formData.append('file', fs.createReadStream(output));
         formData.append('model', 'whisper-1');
 
+        console.log('Starting transcription...');
         const response = await axios.post('https://api.openai.com/v1/audio/transcriptions', formData, {
             headers: {
                 'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
                 ...formData.getHeaders(),
             },
         });
+        console.log('Transcription completed.');
 
         let transcription = response.data.text;
         transcription = wrapText(transcription);  // 例如，每行最多40個字符
